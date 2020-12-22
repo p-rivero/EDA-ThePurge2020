@@ -15,7 +15,8 @@ The best players of each school go on to compete in a grand final held live, and
 
 - [rules.pdf](https://github.com/p-rivero/EDA-ThePurge2020/blob/main/Docs/rules.pdf) contains the rules of the game
 - [AIEldar.cc](https://github.com/p-rivero/EDA-ThePurge2020/blob/main/AIEldar.cc) contains the AI itself
+- [tester.cc](https://github.com/p-rivero/EDA-ThePurge2020/blob/main/tester.cc) is a small utility program to simulate thousands of games
 - [viewer.html](https://github.com/p-rivero/EDA-ThePurge2020/blob/main/Viewer/viewer.html) allows viewing the results of a played game
 
 ## Copyright and licence
-You are free to do whatever you want with the AI (AIEldar.cc). The rest of the files are property of the UPC (see README.txt).
+You are free to do whatever you want with the AI (AIEldar.cc) and the tester (tester.cc). The rest of the files are property of the UPC (see README.txt).
