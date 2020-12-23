@@ -22,8 +22,8 @@
 
    Some bookmarks:
    Line 191: build_board function and its auxiliary functions
-   Line 354: approach_target function and its auxiliary functions (basically the main AI)
-   Line 760: main function that calls the tasks of each citizen
+   Line 348: approach_target function and its auxiliary functions (basically the main AI)
+   Line 751: main function that calls the tasks of each citizen
    Line 109: bug that reduced my life expectancy by 2 years
 */
 
@@ -229,8 +229,6 @@ struct PLAYER_NAME : public Player {
                 if (info.type == 'M') { // The bonus is money: assume everyone is interested
                     info.closest_is_friendly = (board(u) == FRIENDLY_CITIZEN);
                     info.closest_dist = distance;
-                    // cerr << "Money at " << origin << ": dist=" << distance << ", friend=" << info.closest_is_friendly;
-                    // cerr << ". Last round was: dist=" << (*bonus_distances_prev)[origin].closest_dist << ", friend=" << (*bonus_distances_prev)[origin].closest_is_friendly << endl;
                     return;
                 }
                 else if (info.type == 'W') {
@@ -241,8 +239,6 @@ struct PLAYER_NAME : public Player {
                         if (c.type == Warrior and my_weapon(c) < WEAPON) {
                             info.closest_is_friendly = true;
                             info.closest_dist = distance;
-                            // cerr << "Weapon at " << origin << ": dist=" << distance << ", friend=" << info.closest_is_friendly;
-                            // cerr << ". Last round was: dist=" << (*bonus_distances_prev)[origin].closest_dist << ", friend=" << (*bonus_distances_prev)[origin].closest_is_friendly << endl;
                             return;
                         }
                     }
@@ -250,8 +246,6 @@ struct PLAYER_NAME : public Player {
                         // Found an enemy that's weaker than the weapon
                         info.closest_is_friendly = false;
                         info.closest_dist = distance;
-                        // cerr << "Weapon at " << origin << ": dist=" << distance << ", friend=" << info.closest_is_friendly;
-                        // cerr << ". Last round was: dist=" << (*bonus_distances_prev)[origin].closest_dist << ", friend=" << (*bonus_distances_prev)[origin].closest_is_friendly << endl;
                         return; 
                     }
                 }
@@ -354,7 +348,7 @@ struct PLAYER_NAME : public Player {
     /*  APPROACH TARGET: This is the main algorithm that decides the movement of all units by implementing  */
     /* Dijksta's algorithm on the board: the edge weights are the cost in turns to go from a Pos to another */
     
-    // Returns true is my citizen "cit" is equal or stronger than ENEMY_BUILDER <= Board[i][j] <= ENEMY_BAZOOKA
+    // Returns true if my citizen "cit" is equal or stronger than ENEMY_BUILDER <= Board[i][j] <= ENEMY_BAZOOKA
     inline bool is_stronger(const Citizen& cit, int i, int j) {
         char weapon = my_weapon(cit);
         // If both units have same weapon, the stroger one is the one with most life
@@ -512,9 +506,8 @@ struct PLAYER_NAME : public Player {
                 int closest_dist = (*bonus_distances)[u].closest_dist;
                 // There's a closer citizen and it's approaching it (last round's distance was greater)
                 if (profit > 0 and closest_dist < distance and closest_dist < (*bonus_distances_prev)[u].closest_dist) {
-                    //profit /= 2; // Reduce profit
+                    // Reduce profit, since we won't get there in time
                     profit = 0;
-                    // cerr << "citizen at" << origin << ": profit for money at " << u << " has been reduced" << endl;
                 }
                 if (profit > best_profit) {
                     best_profit = profit;
@@ -548,12 +541,10 @@ struct PLAYER_NAME : public Player {
                 else if ((*bonus_distances)[u].closest_is_friendly) { // I don't need it and closest citizen is friendly
                     // add 4 turn penalty in order to avoid stepping on it (don't steal it from myself)
                     dist[u.i][u.j] += 4;
-                    // cerr << "citizen at" << origin << ": avoiding to step on " << u << endl;
                 }
                 else { // I don't need it and closest citizen is an enemy, try to steal it so the enemy doesn't get it
                     int profit = STEAL_WEAPON_PROFIT - distance;
                     if (board(u) == BAZOOKA) profit += BAZOOKA_EXTRA_PROFIT;
-                    // cerr << "citizen at" << origin << ": could steal weapon at " << u << endl;
                     if (profit > best_profit) {
                         best_profit = profit;
                         best_dir = dir;
