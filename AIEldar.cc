@@ -8,17 +8,17 @@
      - Matrices: Board (general info), Board_Enemy (HP and reachable cells of enemies) and Board_Barricades (HP of barricades)
      - Maps: For each cell with a weapon or money, store distance to closest enemy in this round AND ALSO LAST ROUND (only piece of memory of this AI)
    - Each citizen then computes its distance in turns to every cell by performing Dijkstra's algorithm on the Board matrix.
-     When an object (bonus or enemy) is found, the true profit of the cell is calcultated as roughly (PROFIT_OF_OBJECT - distance).
+     When an object (bonus or enemy) is found, the true profit of the cell is calculated as roughly (PROFIT_OF_OBJECT - distance).
      Some additional optimizations are performed:
-     - If a move is obviously good (picking up a weapon or killing an enemy), it's taken direcltly instead of searching the board
+     - If a move is obviously good (picking up a weapon or killing an enemy), it's taken directly instead of searching the board
      - A citizen will not try to get a weapon when another warrior (interested in the weapon) is closer, since it wouldn't get there in time.
      - Same with money, but assume that all citizens are interested (not just weak warriors). Also assume that, when a citizen is not DIRECTLY
        approaching money, it's not interested in grabbing it (maybe it has found a weapon or food, it's safe to go for the money).
-   - Warriors always move to approach the target with highest profit. Builders at day, if the profit is under a theshold, attempt to build a barricade to
+   - Warriors always move to approach the target with highest profit. Builders at day, if the profit is under a threshold, attempt to build a barricade to
      make surviving at night easier. 
    - Movement is only performed if it's safe to do so, in order to minimize damage taken.
    - Once a citizen has decided what to do, the instruction gets stored in a priority queue that gets flushed at the end of the round.
-     This allows assigning a priority to the instructions, since they get excecuted in the order they are sent.
+     This allows assigning a priority to the instructions, since they get executed in the order they are sent.
 
    Some bookmarks:
    Line 191: build_board function and its auxiliary functions
@@ -94,17 +94,17 @@ struct PLAYER_NAME : public Player {
     const int RUN_DEATH_PRIORITY = 20;  // escaping (1 hit away from dying)
     const int VERY_HIGH_PRIORITY = 500; // grabbing weapon or killing enemy
     
-    // Queue for all instructions that need be executed. Allows assigning a priority to each instruction
+    // Queue for all instructions that need to be executed. Allows assigning a priority to each instruction
     priority_queue<Instr> instruction_buffer;
     
 
-    // Vertex representaton for Dijksta's algorithm
+    // Vertex representation for Dijkstra's algorithm
     struct Vertex {
         int dist;   // Distance from origin
         Pos pos;    // Position on the board
-        Dir dir;    // Which direction should we move to reach the positin
+        Dir dir;    // Which direction should we move to reach the position
         
-        // An element is LESS ATTRACTIVE if it's distance is GREATER.
+        // An element is LESS ATTRACTIVE if its distance is GREATER.
         bool operator<(const Vertex& i) const {
             return dist > i.dist; // This single '>' character is the reason I had to install a debugger
         }
@@ -139,7 +139,7 @@ struct PLAYER_NAME : public Player {
     const int WEAPON_PROFIT = 25;
     const int STEAL_WEAPON_PROFIT = 12;
     const int BAZOOKA_EXTRA_PROFIT = 3; // Add 3 to WEAPON_PROFIT when stealing a bazooka and 6 when trying to get it
-    const int WARRIOR_EXTRA_PROFIT = 3; // Increase profit for attacking a warior instead of a builder
+    const int WARRIOR_EXTRA_PROFIT = 3; // Increase profit for attacking a warrior instead of a builder
     
     // Parameters for building barricades:
     const int BARRICADE_THRESHOLD = 2;              // Barricade threshold during the day
@@ -153,7 +153,7 @@ struct PLAYER_NAME : public Player {
 
 
 
-    /* INLINE FUNCTIONS for improving readability of common actions: they get get inserted inline without performance penalty */
+    /* INLINE FUNCTIONS for improving readability of common actions: they get inserted inline without performance penalty */
     
     // Add a "move" instruction to the instruction buffer 
     inline void _move(int priority, int id, const Dir& where) {
@@ -257,7 +257,7 @@ struct PLAYER_NAME : public Player {
                 // only add to queue if: inside the board, and not a wall, and...
                 if (pos_ok(new_p) and board(new_p) != WALL) {
                     unsigned short int new_distance = dist[u.i][u.j] + 1; // By default, the cost in turns is 1
-                    // Simplified version of add_movement_penalties, asume all citizens are bazookas and barricades affect everyone
+                    // Simplified version of add_movement_penalties, assume all citizens are bazookas and barricades affect everyone
                     if (board_barricades(new_p) < 0) distance += (-board_barricades(new_p)/bazooka_strength_demolish());
                     if (board_barricades(new_p) > 0) distance += (board_barricades(new_p)/bazooka_strength_demolish());
 
@@ -346,12 +346,12 @@ struct PLAYER_NAME : public Player {
 
 
     /*  APPROACH TARGET: This is the main algorithm that decides the movement of all units by implementing  */
-    /* Dijksta's algorithm on the board: the edge weights are the cost in turns to go from a Pos to another */
+    /* Dijkstra's algorithm on the board: the edge weights are the cost in turns to go from a Pos to another */
     
     // Returns true if my citizen "cit" is equal or stronger than ENEMY_BUILDER <= Board[i][j] <= ENEMY_BAZOOKA
     inline bool is_stronger(const Citizen& cit, int i, int j) {
         char weapon = my_weapon(cit);
-        // If both units have same weapon, the stroger one is the one with most life
+        // If both units have same weapon, the stronger one is the one with most life
         if (weapon == -Board[i][j]) return cit.life > citizen(cell(i, j).id).life;
         return weapon > -Board[i][j];
     }
@@ -488,7 +488,7 @@ struct PLAYER_NAME : public Player {
             //    warrior   and    u contains an enemy    and  my warrior is stronger  and    it will be at night when I get there 
             if ( is_warrior and board(u) <= ENEMY_BUILDER and is_stronger(c, u.i, u.j) and is_round_night(round() + dist[u.i][u.j]) ) {
                 int profit = ATTACK_PROFIT - distance;
-                // Don't check adjancent positions: assume enemies are able to survive until we get there
+                // Don't check adjacent positions: assume enemies are able to survive until we get there
 
                 // Increase profit of attacking warriors instead of builders
                 if (board(u) < ENEMY_BUILDER) profit += WARRIOR_EXTRA_PROFIT;
@@ -518,7 +518,7 @@ struct PLAYER_NAME : public Player {
             else if (NEED_HEAL and board(u) == FOOD) { // low on health and found food
                 int profit = HEALTH_PROFIT - distance;
                 if (life_lost_in_attack() >= c.life) profit += ABOUT_TO_DIE_BONUS;
-                // Don't check adjancent positions: assume no one is interested in health
+                // Don't check adjacent positions: assume no one is interested in health
 
                 if (profit > best_profit) {
                     best_profit = profit;
@@ -576,7 +576,7 @@ struct PLAYER_NAME : public Player {
 
         if (best_profit == INT_MIN) return false; // No good vertex found
 
-        // Compute threshold for building barricades. Begin at -intinity: never build barricade
+        // Compute threshold for building barricades. Begin at -infinity: never build barricade
         int barricade_threshold = INT_MIN;
         // Meets conditions for being able to build (builder at day and not inside a barricade)
         if (is_day() and not is_warrior and board_barricades(origin) == 0) {
@@ -662,7 +662,7 @@ struct PLAYER_NAME : public Player {
     
     // id is the identifier of a warrior and current round is day
     void warrior_day_task(int id) {
-        // At day, crimes can't be commited: just search for bonuses
+        // At day, crimes can't be committed: just search for bonuses
         approach_target(id, true);
     }
 
@@ -712,7 +712,7 @@ struct PLAYER_NAME : public Player {
 
     // id is the identifier of a warrior and current round is night
     void warrior_night_task(int id) {
-        // At night crimes can be commited: search and attack closest safe target
+        // At night crimes can be committed: search and attack closest safe target
 
         // A safe position to move has been found, don't do anything else
         if (approach_target(id, true)) return;
@@ -789,7 +789,7 @@ struct PLAYER_NAME : public Player {
 /* =================================== */
 /* In memory of PapaTormenta, who came */
 /* back from the dead to save us all.  */
-/*    May you always be remembered.    */
+/*    May you be always remembered.    */
 /* =================================== */
 
 
